@@ -28,21 +28,21 @@ func (e *PagesEntity) Refresh(client core.Client) (interface{}, error) {
 		return nil, fmt.Errorf("invalid client type for pages entity, expected *confluence.Client")
 	}
 
-	log.Printf("Récupération des pages Confluence...")
+	log.Printf("Fetching Confluence pages...")
 
 	pages, err := confluenceClient.GetPages()
 	if err != nil {
-		return nil, fmt.Errorf("récupération des pages: %w", err)
+		return nil, fmt.Errorf("fetch pages: %w", err)
 	}
 
-	log.Printf("Récupérées %d pages", len(pages))
+	log.Printf("Fetched %d pages", len(pages))
 
 	if pagesBodyRAGEnabled(e.cfg) {
-		log.Printf("RAG corps activé (fields.body.rag) : récupération du storage pour %d pages", len(pages))
+		log.Printf("RAG enabled for body (fields.body.rag): fetching storage for %d pages", len(pages))
 		for i := range pages {
 			storage, err := confluenceClient.GetPageStorage(pages[i].ID)
 			if err != nil {
-				log.Printf("Corps page id=%s: %v", pages[i].ID, err)
+				log.Printf("page body id=%s: %v", pages[i].ID, err)
 				continue
 			}
 			pages[i].Body = storage
@@ -72,9 +72,9 @@ func (e *PagesEntity) Save(stateManager core.StateManager, data interface{}) err
 	}
 
 	if err := stateManager.SaveEntity(e.Name(), pages); err != nil {
-		return fmt.Errorf("sauvegarde des pages: %w", err)
+		return fmt.Errorf("save pages state: %w", err)
 	}
 
-	log.Printf("État des pages sauvegardé")
+	log.Printf("Pages state saved")
 	return nil
 }

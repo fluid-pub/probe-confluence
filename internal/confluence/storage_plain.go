@@ -8,7 +8,7 @@ import (
 
 var storageTagPattern = regexp.MustCompile(`(?s)<[^>]+>`)
 
-// StorageToPlain extrait un texte lisible approximatif depuis le format storage Confluence (XML/HTML).
+// StorageToPlain extracts approximate plain text from Confluence storage format (XML/HTML).
 func StorageToPlain(storage string) string {
 	if storage == "" {
 		return ""

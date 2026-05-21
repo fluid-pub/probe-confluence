@@ -53,7 +53,7 @@ func LoadConfig(configPath string) (*Config, error) {
 	schemaPath := filepath.Join(filepath.Dir(configPath), "schema.yml")
 	schemaData, err := os.ReadFile(schemaPath)
 	if err != nil {
-		return nil, fmt.Errorf("schema.yml requis (même répertoire que la config) pour valider fields.*.rag: %w", err)
+		return nil, fmt.Errorf("schema.yml required (same directory as config) to validate fields.*.rag: %w", err)
 	}
 	allowed, err := core.ParseRAGFieldSetFromSchemaYAML(schemaData)
 	if err != nil {

@@ -58,7 +58,7 @@ entities:
       source_url:
         type: "string"
         nullable: true
-        description: "Absolute browser URL (wiki base + webui path) — set by the probe for RAG links"
+        description: "Absolute browser URL (wiki base + webui path); set by the probe for RAG links"
       _links:
         type: "object"
         description: "Links (webui, editui, tinyui)"

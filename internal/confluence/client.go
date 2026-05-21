@@ -44,7 +44,7 @@ func NewClient(cfg *config.ConfluenceConfig) *Client {
 	if cfg.Email != "" {
 		authHeader = "Basic " + base64.StdEncoding.EncodeToString([]byte(cfg.Email+":"+cfg.Token))
 		useBasic = true
-		log.Printf("Confluence: auth Basic (email présent)")
+		log.Printf("Confluence: using Basic auth (email set)")
 	} else {
 		log.Printf("Confluence: auth Bearer")
 	}
@@ -61,7 +61,7 @@ func NewClient(cfg *config.ConfluenceConfig) *Client {
 	}
 }
 
-// SetContext fixe le contexte pour les requêtes HTTP (annulation, deadline).
+// SetContext sets the context used for HTTP requests (cancellation, deadlines).
 func (c *Client) SetContext(ctx context.Context) {
 	if ctx == nil {
 		c.ctx = context.Background()
@@ -70,7 +70,7 @@ func (c *Client) SetContext(ctx context.Context) {
 	c.ctx = ctx
 }
 
-// fetchPagesViaCurl appelle curl pour une URL et retourne la réponse parsée + next URL si présente
+// fetchPagesViaCurl calls curl for a URL and returns the parsed response and next URL when present.
 func (c *Client) fetchPagesViaCurl(fetchURL string) (*models.PagesResponse, error) {
 	email, token := os.Getenv("CONFLUENCE_EMAIL"), os.Getenv("CONFLUENCE_TOKEN")
 	if email == "" || token == "" {
@@ -101,7 +101,7 @@ func (c *Client) GetPages() ([]models.Page, error) {
 	url := c.baseURL + apiPathPages + "?limit=" + fmt.Sprintf("%d", pageLimit)
 	log.Printf("Confluence API: GET %s", url)
 
-	// Fallback: si le client HTTP Go renvoie 404 (routage Atlassian), utiliser curl avec pagination
+	// Fallback: when the Go HTTP client gets 404 (Atlassian routing), paginate via curl.
 	if c.useBasic {
 		email, token := os.Getenv("CONFLUENCE_EMAIL"), os.Getenv("CONFLUENCE_TOKEN")
 		if email != "" && token != "" {
@@ -188,7 +188,7 @@ func (c *Client) GetPages() ([]models.Page, error) {
 	return all, nil
 }
 
-// fetchURLViaCurl exécute un GET JSON (même stratégie que la liste de pages en fallback curl).
+// fetchURLViaCurl performs a JSON GET using the same curl fallback strategy as page listing.
 func (c *Client) fetchURLViaCurl(fetchURL string) ([]byte, error) {
 	email, token := os.Getenv("CONFLUENCE_EMAIL"), os.Getenv("CONFLUENCE_TOKEN")
 	if email == "" || token == "" {
@@ -249,7 +249,7 @@ func (c *Client) getBytes(ctx context.Context, url string) ([]byte, error) {
 	return raw, nil
 }
 
-// GetPageStorage récupère le corps d’une page au format storage (XML Confluence).
+// GetPageStorage returns a page body in Confluence storage format (XML).
 func (c *Client) GetPageStorage(pageID string) (string, error) {
 	if pageID == "" {
 		return "", fmt.Errorf("page id is empty")
