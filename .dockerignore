@@ -1,0 +1,10 @@
+.git
+.github
+build
+dist
+state
+state/**
+*.md
+env.secrets
+env.secrets.example
+**/*_test.go

@@ -1,0 +1,74 @@
+entities:
+  pages:
+    description: "Confluence pages (entities collected by the probe)"
+    fields:
+      id:
+        type: "string"
+        description: "Unique page identifier"
+        primary: true
+      title:
+        type: "string"
+        description: "Page title"
+        usable_in_rag: true
+        # Indexed text: `rag_for_title` (set by the probe).
+      body:
+        type: "string"
+        nullable: true
+        description: "Page body in Confluence storage format (present when `rag: true` on the pages entity in config)"
+        usable_in_rag: true
+        # Indexed text: `rag_for_body` (plain text extracted from storage, set by the probe).
+      status:
+        type: "string"
+        description: "Status (current, archived, draft)"
+      space_id:
+        type: "string"
+        description: "Space identifier"
+      parent_id:
+        type: "string"
+        nullable: true
+        description: "Parent page identifier"
+      parent_type:
+        type: "string"
+        nullable: true
+        description: "Parent type (page, etc.)"
+      author_id:
+        type: "string"
+        nullable: true
+        description: "Author identifier"
+      created_at:
+        type: "string"
+        format: "datetime"
+        description: "Creation timestamp"
+      version:
+        type: "object"
+        description: "Version metadata"
+        properties:
+          number:
+            type: "integer"
+            description: "Version number"
+          created_at:
+            type: "string"
+            format: "datetime"
+          message:
+            type: "string"
+            nullable: true
+          author_id:
+            type: "string"
+            nullable: true
+      source_url:
+        type: "string"
+        nullable: true
+        description: "Absolute browser URL (wiki base + webui path); set by the probe for RAG links"
+      _links:
+        type: "object"
+        description: "Links (webui, editui, tinyui)"
+        properties:
+          webui:
+            type: "string"
+            nullable: true
+          editui:
+            type: "string"
+            nullable: true
+          tinyui:
+            type: "string"
+            nullable: true
