@@ -8,8 +8,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
-	"os/exec"
 	"strings"
 	"time"
 
@@ -70,95 +68,22 @@ func (c *Client) SetContext(ctx context.Context) {
 	c.ctx = ctx
 }
 
-// fetchPagesViaCurl calls curl for a URL and returns the parsed response and next URL when present.
-func (c *Client) fetchPagesViaCurl(fetchURL string) (*models.PagesResponse, error) {
-	email, token := os.Getenv("CONFLUENCE_EMAIL"), os.Getenv("CONFLUENCE_TOKEN")
-	if email == "" || token == "" {
-		return nil, fmt.Errorf("CONFLUENCE_EMAIL/CONFLUENCE_TOKEN required for curl fallback")
-	}
-	out, err := exec.Command("curl", "-s", "-u", email+":"+token, "-H", "Accept: application/json", fetchURL).Output()
-	if err != nil {
-		return nil, err
-	}
-	body := strings.TrimSpace(string(out))
-	if body == "" {
-		return nil, fmt.Errorf("curl returned empty body")
-	}
-	var data models.PagesResponse
-	if json.Unmarshal([]byte(body), &data) != nil {
-		snippet := body
-		if len(snippet) > 200 {
-			snippet = snippet[:200] + "..."
-		}
-		return nil, fmt.Errorf("invalid JSON (starts with: %q)", snippet)
-	}
-	return &data, nil
-}
-
 // GetPages returns all pages (paginated)
 func (c *Client) GetPages() ([]models.Page, error) {
+	startURL := c.baseURL + apiPathPages + "?limit=" + fmt.Sprintf("%d", pageLimit)
+	log.Printf("Confluence API: GET %s", startURL)
+	return c.getPagesHTTP(startURL)
+}
+
+func (c *Client) getPagesHTTP(startURL string) ([]models.Page, error) {
 	var all []models.Page
-	url := c.baseURL + apiPathPages + "?limit=" + fmt.Sprintf("%d", pageLimit)
-	log.Printf("Confluence API: GET %s", url)
-
-	// Fallback: when the Go HTTP client gets 404 (Atlassian routing), paginate via curl.
-	if c.useBasic {
-		email, token := os.Getenv("CONFLUENCE_EMAIL"), os.Getenv("CONFLUENCE_TOKEN")
-		if email != "" && token != "" {
-			for fetchURL := url; fetchURL != ""; {
-				data, err := c.fetchPagesViaCurl(fetchURL)
-				if err != nil {
-					return nil, fmt.Errorf("curl fallback: %w", err)
-				}
-				for _, r := range data.Results {
-					p, _ := models.PageFromResult(r, c.wikiBaseURL)
-					all = append(all, p)
-				}
-				fetchURL = ""
-				if data.Links.Next != "" {
-					if strings.HasPrefix(data.Links.Next, "http") {
-						fetchURL = data.Links.Next
-					} else {
-						fetchURL = c.baseURL + data.Links.Next
-					}
-				}
-			}
-			log.Printf("Confluence API: curl fallback OK (%d pages total)", len(all))
-			return all, nil
-		}
-	}
-
-	for url != "" {
-		req, err := http.NewRequest(http.MethodGet, url, nil)
+	for url := startURL; url != ""; {
+		body, status, err := c.doGET(url)
 		if err != nil {
-			return nil, fmt.Errorf("creating request: %w", err)
+			return nil, err
 		}
-		req.Header.Set("Accept", "application/json")
-		req.Header.Set("User-Probe", "curl/7.68.0")
-		if c.useBasic {
-			email, token := os.Getenv("CONFLUENCE_EMAIL"), os.Getenv("CONFLUENCE_TOKEN")
-			if email != "" && token != "" {
-				req.SetBasicAuth(email, token)
-			} else {
-				req.Header.Set("Authorization", c.authHeader)
-			}
-		} else {
-			req.Header.Set("Authorization", c.authHeader)
-		}
-
-		resp, err := c.httpClient.Do(req)
-		if err != nil {
-			return nil, fmt.Errorf("request failed: %w", err)
-		}
-
-		body, err := io.ReadAll(resp.Body)
-		resp.Body.Close()
-		if err != nil {
-			return nil, fmt.Errorf("reading response: %w", err)
-		}
-
-		if resp.StatusCode != http.StatusOK {
-			return nil, fmt.Errorf("API error %d: %s", resp.StatusCode, string(body))
+		if status != http.StatusOK {
+			return nil, fmt.Errorf("API error %d: %s", status, string(body))
 		}
 
 		var data models.PagesResponse
@@ -174,7 +99,6 @@ func (c *Client) GetPages() ([]models.Page, error) {
 			all = append(all, p)
 		}
 
-		// Pagination: next URL can be in _links.next (relative or absolute)
 		url = ""
 		if data.Links.Next != "" {
 			if strings.HasPrefix(data.Links.Next, "http") {
@@ -184,69 +108,58 @@ func (c *Client) GetPages() ([]models.Page, error) {
 			}
 		}
 	}
-
 	return all, nil
-}
-
-// fetchURLViaCurl performs a JSON GET using the same curl fallback strategy as page listing.
-func (c *Client) fetchURLViaCurl(fetchURL string) ([]byte, error) {
-	email, token := os.Getenv("CONFLUENCE_EMAIL"), os.Getenv("CONFLUENCE_TOKEN")
-	if email == "" || token == "" {
-		return nil, fmt.Errorf("CONFLUENCE_EMAIL/CONFLUENCE_TOKEN required for curl fallback")
-	}
-	out, err := exec.Command("curl", "-s", "-u", email+":"+token, "-H", "Accept: application/json", fetchURL).Output()
-	if err != nil {
-		return nil, err
-	}
-	body := strings.TrimSpace(string(out))
-	if body == "" {
-		return nil, fmt.Errorf("curl returned empty body")
-	}
-	return []byte(body), nil
 }
 
 func (c *Client) getBytes(ctx context.Context, url string) ([]byte, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	if c.useBasic {
-		email, token := os.Getenv("CONFLUENCE_EMAIL"), os.Getenv("CONFLUENCE_TOKEN")
-		if email != "" && token != "" {
-			return c.fetchURLViaCurl(url)
-		}
+	body, status, err := c.doGETWithContext(ctx, url)
+	if err != nil {
+		return nil, err
 	}
+	if status != http.StatusOK {
+		return nil, fmt.Errorf("API error %d: %s", status, string(body))
+	}
+	return body, nil
+}
 
+func (c *Client) doGET(url string) ([]byte, int, error) {
+	ctx := c.ctx
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	return c.doGETWithContext(ctx, url)
+}
+
+func (c *Client) doGETWithContext(ctx context.Context, url string) ([]byte, int, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("creating request: %w", err)
+		return nil, 0, fmt.Errorf("creating request: %w", err)
 	}
 	req.Header.Set("Accept", "application/json")
-	req.Header.Set("User-Probe", "curl/7.68.0")
-	if c.useBasic {
-		email, token := os.Getenv("CONFLUENCE_EMAIL"), os.Getenv("CONFLUENCE_TOKEN")
-		if email != "" && token != "" {
-			req.SetBasicAuth(email, token)
-		} else {
-			req.Header.Set("Authorization", c.authHeader)
-		}
-	} else {
-		req.Header.Set("Authorization", c.authHeader)
-	}
+	c.setAuth(req)
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("request failed: %w", err)
+		return nil, 0, fmt.Errorf("request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
 	raw, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("reading response: %w", err)
+		return nil, resp.StatusCode, fmt.Errorf("reading response: %w", err)
 	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API error %d: %s", resp.StatusCode, string(raw))
+	return raw, resp.StatusCode, nil
+}
+
+func (c *Client) setAuth(req *http.Request) {
+	if c.useBasic && c.email != "" && c.token != "" {
+		req.SetBasicAuth(c.email, c.token)
+		return
 	}
-	return raw, nil
+	req.Header.Set("Authorization", c.authHeader)
 }
 
 // GetPageStorage returns a page body in Confluence storage format (XML).
