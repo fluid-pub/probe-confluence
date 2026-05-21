@@ -3,4 +3,4 @@
 [submodule "core"]
 	path = core
 	url = https://github.com/fluid-pub/probe-core.git
-	branch = feat/publish-core
+	branch = develop
