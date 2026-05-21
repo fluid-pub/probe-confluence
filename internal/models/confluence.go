@@ -21,15 +21,15 @@ type Page struct {
 	ID    string `json:"id" yaml:"id"`
 	Title string `json:"title" yaml:"title"`
 	// RagForTitle is indexed for RAG (control plane: usable_in_rag + rag_for_title).
-	RagForTitle string `json:"rag_for_title,omitempty" yaml:"rag_for_title,omitempty"`
-	Status     string `json:"status" yaml:"status"`
-	SpaceID    string `json:"space_id" yaml:"space_id"`
-	ParentID   string `json:"parent_id,omitempty" yaml:"parent_id,omitempty"`
-	ParentType string `json:"parent_type,omitempty" yaml:"parent_type,omitempty"`
-	AuthorID   string `json:"author_id,omitempty" yaml:"author_id,omitempty"`
-	CreatedAt  time.Time  `json:"created_at" yaml:"created_at"`
-	Version    PageVersion `json:"version" yaml:"version"`
-	Links      PageLinks  `json:"_links,omitempty" yaml:"_links,omitempty"`
+	RagForTitle string      `json:"rag_for_title,omitempty" yaml:"rag_for_title,omitempty"`
+	Status      string      `json:"status" yaml:"status"`
+	SpaceID     string      `json:"space_id" yaml:"space_id"`
+	ParentID    string      `json:"parent_id,omitempty" yaml:"parent_id,omitempty"`
+	ParentType  string      `json:"parent_type,omitempty" yaml:"parent_type,omitempty"`
+	AuthorID    string      `json:"author_id,omitempty" yaml:"author_id,omitempty"`
+	CreatedAt   time.Time   `json:"created_at" yaml:"created_at"`
+	Version     PageVersion `json:"version" yaml:"version"`
+	Links       PageLinks   `json:"_links,omitempty" yaml:"_links,omitempty"`
 	// SourceURL is the browser "view source" URL (wiki base + _links.webui), set by the probe.
 	SourceURL string `json:"source_url,omitempty" yaml:"source_url,omitempty"`
 	// Body is raw storage XML from the API when config has fields.body.rag: true.

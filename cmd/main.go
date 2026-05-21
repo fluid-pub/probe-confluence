@@ -7,10 +7,10 @@ import (
 	"os/signal"
 	"syscall"
 
+	"fluid/probes/confluence/internal/config"
+	"fluid/probes/confluence/internal/probe"
 	"fluid/probes/core"
 	"fluid/probes/core/state"
-	"fluid/probes/confluence/internal/probe"
-	"fluid/probes/confluence/internal/config"
 )
 
 func main() {

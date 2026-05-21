@@ -158,9 +158,9 @@ func resolveEnvVar(value string) (string, bool) {
 	return os.Getenv(envVar), true
 }
 
-func (c *Config) GetProbeName() string   { return c.Probe.Name }
-func (c *Config) GetProbeVersion() string { return c.Probe.Version }
-func (c *Config) GetStateDir() string    { return c.State.Dir }
-func (c *Config) GetCleanupInterval() int { return c.State.CleanupInterval }
-func (c *Config) GetEntities() []core.EntityConfig { return c.Data.Entities }
+func (c *Config) GetProbeName() string                      { return c.Probe.Name }
+func (c *Config) GetProbeVersion() string                   { return c.Probe.Version }
+func (c *Config) GetStateDir() string                       { return c.State.Dir }
+func (c *Config) GetCleanupInterval() int                   { return c.State.CleanupInterval }
+func (c *Config) GetEntities() []core.EntityConfig          { return c.Data.Entities }
 func (c *Config) GetControlplane() *core.ControlplaneConfig { return c.Controlplane }

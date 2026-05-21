@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"log"
 
-	"fluid/probes/core"
-	"fluid/probes/core/state"
-	"fluid/probes/confluence/internal/probe/entities"
 	"fluid/probes/confluence/internal/config"
 	"fluid/probes/confluence/internal/confluence"
 	"fluid/probes/confluence/internal/manager"
+	"fluid/probes/confluence/internal/probe/entities"
+	"fluid/probes/core"
+	"fluid/probes/core/state"
 )
 
 type Probe struct {
