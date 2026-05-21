@@ -15,6 +15,12 @@ Fluid probe for Atlassian Confluence Cloud: collects wiki **pages** and pushes e
 
 ## Local development
 
+One-time per clone, enable the same **`gofmt`** check as CI:
+
+```bash
+./scripts/install-git-hooks.sh
+```
+
 ```bash
 git submodule update --init --recursive
 cp config/probe.example.yml config/probe.yml
