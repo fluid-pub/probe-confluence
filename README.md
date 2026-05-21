@@ -18,10 +18,13 @@ Fluid probe for Atlassian Confluence Cloud: collects wiki **pages** and pushes e
 git submodule update --init --recursive
 cp config/probe.example.yml config/probe.yml
 cp env.secrets.example env.secrets
-# edit config/probe.yml and env.secrets
+# Set your Atlassian and control plane values in env.secrets (never commit that file).
+# Optionally adjust URLs in config/probe.yml (also gitignored).
 source env.secrets
 make dev
 ```
+
+All credentials and tenant URLs come from **your** `env.secrets` and local `config/probe.yml` only — nothing customer-specific is stored in this repository.
 
 `make dev` runs `go run ./cmd` with `-config config/probe.yml`. Runtime snapshots go under `state/` (gitignored).
 

@@ -1,7 +1,6 @@
 package config
 
 import (
-	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -13,22 +12,20 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const markConfigPath = "~/.config/mark"
-
 type Config struct {
 	Probe        core.ProbeConfig         `yaml:"probe"`
 	Confluence   ConfluenceConfig         `yaml:"confluence"`
 	Data         core.DataConfig          `yaml:"data"`
 	State        core.StateConfig         `yaml:"state"`
 	Controlplane *core.ControlplaneConfig `yaml:"controlplane,omitempty"`
-	// RAGFieldAllowlist est rempli depuis config/schema.yml (champs usable_in_rag) ; non sérialisé.
+	// Filled from config/schema.yml (usable_in_rag); not serialized.
 	RAGFieldAllowlist core.RAGFieldSet `yaml:"-"`
 }
 
 type ConfluenceConfig struct {
 	BaseURL string `yaml:"base_url"`
-	// WikiBaseURL : base des URLs navigateur (ex. https://tenant.atlassian.net/wiki), sans slash final.
-	// Non utilisée par le client API ; à reporter dans le runtime_config du control plane pour les liens RAG.
+	// WikiBaseURL is the browser wiki root (e.g. https://tenant.atlassian.net/wiki), no trailing slash.
+	// Not used by the API client; expose via control plane runtime_config for RAG source links.
 	WikiBaseURL string `yaml:"wiki_base_url,omitempty"`
 	Token       string `yaml:"token"`
 	Email       string `yaml:"email,omitempty"` // If set, use Basic auth (email:token)
@@ -47,11 +44,6 @@ func LoadConfig(configPath string) (*Config, error) {
 
 	if err := config.resolveEnvironmentVariables(); err != nil {
 		return nil, fmt.Errorf("error resolving environment variables: %w", err)
-	}
-
-	// Optionally fill Confluence credentials from ~/.config/mark (email, token, base_url)
-	if err := config.loadFromMarkConfig(); err != nil {
-		log.Printf("Warning: load from %s: %v", markConfigPath, err)
 	}
 
 	if err := config.Validate(); err != nil {
@@ -164,64 +156,6 @@ func resolveEnvVar(value string) (string, bool) {
 	}
 	envVar := strings.TrimPrefix(strings.TrimSuffix(value, "}"), "${")
 	return os.Getenv(envVar), true
-}
-
-// loadFromMarkConfig fills Confluence credentials from ~/.config/mark if not already set.
-// File format: key = "value" (username -> email, password -> token, base-url -> base_url).
-func (c *Config) loadFromMarkConfig() error {
-	path := markConfigPath
-	if strings.HasPrefix(path, "~/") {
-		path = filepath.Join(os.Getenv("HOME"), path[2:])
-	}
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return err
-	}
-
-	kv := parseMarkConfig(data)
-	if len(kv) == 0 {
-		return nil
-	}
-
-	if c.Confluence.Email == "" && kv["username"] != "" {
-		c.Confluence.Email = kv["username"]
-		log.Printf("Using Confluence email from %s", markConfigPath)
-	}
-	if c.Confluence.Token == "" && kv["password"] != "" {
-		c.Confluence.Token = kv["password"]
-		log.Printf("Using Confluence token from %s", markConfigPath)
-	}
-	if c.Confluence.BaseURL == "" || c.Confluence.BaseURL == "https://your-site.atlassian.net" {
-		if u := kv["base-url"]; u != "" {
-			u = strings.TrimSuffix(u, "/")
-			u = strings.TrimSuffix(u, "/wiki")
-			c.Confluence.BaseURL = u
-			log.Printf("Using Confluence base_url from %s", markConfigPath)
-		}
-	}
-
-	return nil
-}
-
-// parseMarkConfig parses key = "value" lines and returns a map (keys lowercased).
-func parseMarkConfig(data []byte) map[string]string {
-	out := make(map[string]string)
-	scanner := bufio.NewScanner(strings.NewReader(string(data)))
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-		idx := strings.Index(line, "=")
-		if idx < 0 {
-			continue
-		}
-		key := strings.TrimSpace(strings.ToLower(line[:idx]))
-		val := strings.TrimSpace(line[idx+1:])
-		val = strings.Trim(val, `"`)
-		out[key] = val
-	}
-	return out
 }
 
 func (c *Config) GetProbeName() string   { return c.Probe.Name }
