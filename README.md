@@ -40,3 +40,7 @@ Tag creation on this public repository is restricted to the org **`release-manag
 ## Control plane
 
 Enroll as a probe with `agent_type: confluence`. Set `wiki_base_url` in runtime config when the control plane should build wiki links for indexed pages.
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for vulnerability reporting. Repository automation includes Dependabot (`.github/dependabot.yml`) and CodeQL (`.github/workflows/codeql.yml`).
