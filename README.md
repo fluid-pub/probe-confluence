@@ -10,6 +10,7 @@ Fluid probe for Atlassian Confluence Cloud: collects wiki **pages** and pushes e
 | `cmd/` | Entrypoint and `cmd/version.go` (semver for releases) |
 | `internal/` | Confluence API client, entities, config |
 | `config/probe.example.yml` | Configuration template |
+| `config/schema.yml` | Entity schema (shipped in the Docker image; pushed to the control plane on connect) |
 | `.github/workflows/` | CI and release via [`fluid-pub/actions`](https://github.com/fluid-pub/actions) |
 
 ## Local development
@@ -39,7 +40,7 @@ Tag creation on this public repository is restricted to the org **`release-manag
 
 ## Control plane
 
-Enroll as a probe with `agent_type: confluence`. Set `wiki_base_url` in runtime config when the control plane should build wiki links for indexed pages.
+Enroll as a probe with `agent_type: confluence`. Operational tuning (`data.entities`, `fields.*.rag`, intervals) belongs in **runtime_config** on the probe record. The schema contract is **`config/schema.yml`** (image semver); Kubernetes/GitOps should mount only bootstrap YAML (see **`fluid-workload`** `config.schemaInImage`).
 
 ## Security
 

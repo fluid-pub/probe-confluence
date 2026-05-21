@@ -24,6 +24,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
 FROM gcr.io/distroless/static-debian12:nonroot
 
 COPY --from=build /out/workload /usr/local/bin/workload
+COPY config/schema.yml /etc/fluid/config/schema.yml
 
 USER nonroot:nonroot
 
