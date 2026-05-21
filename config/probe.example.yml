@@ -1,0 +1,30 @@
+# Confluence probe — copy to config/probe.yml and set env vars (see env.secrets.example).
+probe:
+  name: "confluence"
+  version: "0.1.0"
+
+confluence:
+  base_url: "https://your-domain.atlassian.net"
+  wiki_base_url: "https://your-domain.atlassian.net/wiki"
+  token: "${CONFLUENCE_TOKEN}"
+  email: "${CONFLUENCE_EMAIL}"
+
+data:
+  entities:
+    - name: pages
+      refresh_interval: "15m"
+      fields:
+        body:
+          rag: true
+
+state:
+  dir: "state"
+  format: "yaml"
+  cleanup_interval: 1
+
+controlplane:
+  websocket_url: "${FLUID_CONTROLPLANE_WEBSOCKET_URL}"
+  api_version: "v1"
+  parameters:
+    organization_uuid: "${FLUID_CONTROLPLANE_ORGANIZATION_UUID}"
+    token: "${FLUID_CONTROLPLANE_TOKEN}"

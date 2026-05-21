@@ -1,0 +1,74 @@
+entities:
+  pages:
+    description: "Pages Confluence (ressources remontées par l'probe)"
+    fields:
+      id:
+        type: "string"
+        description: "Identifiant unique de la page"
+        primary: true
+      title:
+        type: "string"
+        description: "Titre de la page"
+        usable_in_rag: true
+        # Texte indexé : `rag_for_title` (géré par la sonde).
+      body:
+        type: "string"
+        nullable: true
+        description: "Corps de la page au format storage Confluence (présent si `rag: true` sur l’entité pages dans la config)"
+        usable_in_rag: true
+        # Texte indexé : `rag_for_body` (extrait plat depuis le storage, géré par la sonde).
+      status:
+        type: "string"
+        description: "Statut (current, archived, draft)"
+      space_id:
+        type: "string"
+        description: "Identifiant de l'espace"
+      parent_id:
+        type: "string"
+        nullable: true
+        description: "Identifiant de la page parente"
+      parent_type:
+        type: "string"
+        nullable: true
+        description: "Type du parent (page, etc.)"
+      author_id:
+        type: "string"
+        nullable: true
+        description: "Identifiant de l'auteur"
+      created_at:
+        type: "string"
+        format: "datetime"
+        description: "Date de création"
+      version:
+        type: "object"
+        description: "Métadonnées de version"
+        properties:
+          number:
+            type: "integer"
+            description: "Numéro de version"
+          created_at:
+            type: "string"
+            format: "datetime"
+          message:
+            type: "string"
+            nullable: true
+          author_id:
+            type: "string"
+            nullable: true
+      source_url:
+        type: "string"
+        nullable: true
+        description: "URL navigateur absolue (base wiki + chemin webui) — remplie par l’probe pour les liens RAG"
+      _links:
+        type: "object"
+        description: "Liens (webui, editui, tinyui)"
+        properties:
+          webui:
+            type: "string"
+            nullable: true
+          editui:
+            type: "string"
+            nullable: true
+          tinyui:
+            type: "string"
+            nullable: true

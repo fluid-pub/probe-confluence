@@ -1,0 +1,21 @@
+# Build
+build/
+dist/
+
+# Runtime state (YAML snapshots written at collect time)
+state/*
+!state/.gitkeep
+
+# Local config and secrets (use config/probe.example.yml as template)
+config/probe.yml
+env.secrets
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Go
+*.test
+coverage.out
