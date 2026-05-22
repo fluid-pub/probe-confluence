@@ -23,7 +23,8 @@ state:
   cleanup_interval: 1
 
 controlplane:
-  websocket_url: "${FLUID_CONTROLPLANE_WEBSOCKET_URL}"
+  # Prefer HTTP base (required on control plane 0.5+). Legacy websocket_url is auto-derived when omitted.
+  base_url: "${FLUID_CONTROLPLANE_HTTP_BASE}"
   api_version: "v1"
   parameters:
     organization_uuid: "${FLUID_CONTROLPLANE_ORGANIZATION_UUID}"
