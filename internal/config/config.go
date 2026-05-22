@@ -114,18 +114,12 @@ func (c *Config) resolveEnvironmentVariables() error {
 	if c.Controlplane != nil {
 		if c.Controlplane.BaseURL != "" {
 			if resolved, isEnvVar := resolveEnvVar(c.Controlplane.BaseURL); isEnvVar {
-				c.Controlplane.BaseURL = resolved
-			}
-		}
-
-		if c.Controlplane.WebSocketURL != "" {
-			if resolved, isEnvVar := resolveEnvVar(c.Controlplane.WebSocketURL); isEnvVar {
 				if resolved == "" {
-					log.Printf("Warning: environment variable not defined for websocket_url, controlplane disabled")
+					log.Printf("Warning: environment variable not defined for base_url, controlplane disabled")
 					c.Controlplane = nil
 					return nil
 				}
-				c.Controlplane.WebSocketURL = resolved
+				c.Controlplane.BaseURL = resolved
 			}
 		}
 
