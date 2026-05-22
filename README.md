@@ -1,6 +1,6 @@
 # fluid-pub/probe-confluence
 
-Fluid probe for Atlassian Confluence Cloud: collects wiki **pages** and pushes entities to the control plane over WebSocket.
+Fluid probe for Atlassian Confluence Cloud: collects wiki **pages** and pushes entities to the control plane over HTTP (`/probes`).
 
 ## Repository layout
 
@@ -34,6 +34,10 @@ make dev
 All credentials and tenant URLs come from **your** `env.secrets` and local `config/probe.yml` only — nothing customer-specific is stored in this repository.
 
 `make dev` runs `go run ./cmd` with `-config config/probe.yml`. Runtime snapshots go under `state/` (gitignored).
+
+## Changelog
+
+Release notes: [CHANGELOG.md](CHANGELOG.md).
 
 ## Releases
 

@@ -114,16 +114,11 @@ func (c *Config) resolveEnvironmentVariables() error {
 	if c.Controlplane != nil {
 		if c.Controlplane.BaseURL != "" {
 			if resolved, isEnvVar := resolveEnvVar(c.Controlplane.BaseURL); isEnvVar {
-				if resolved == "" {
-					log.Printf("Warning: environment variable not defined for base_url, controlplane disabled")
-					c.Controlplane = nil
-					return nil
-				}
 				c.Controlplane.BaseURL = resolved
 			}
 		}
 
-		if c.Controlplane != nil && c.Controlplane.WebSocketURL != "" {
+		if c.Controlplane.WebSocketURL != "" {
 			if resolved, isEnvVar := resolveEnvVar(c.Controlplane.WebSocketURL); isEnvVar {
 				if resolved == "" {
 					log.Printf("Warning: environment variable not defined for websocket_url, controlplane disabled")
@@ -134,13 +129,13 @@ func (c *Config) resolveEnvironmentVariables() error {
 			}
 		}
 
-		if c.Controlplane != nil && c.Controlplane.Parameters == nil {
+		if c.Controlplane.Parameters == nil {
 			log.Printf("Warning: controlplane parameters missing, controlplane disabled")
 			c.Controlplane = nil
 			return nil
 		}
 
-		if c.Controlplane != nil && c.Controlplane.Parameters != nil {
+		if c.Controlplane.Parameters != nil {
 			if c.Controlplane.Parameters.OrganizationUUID != "" {
 				if resolved, isEnvVar := resolveEnvVar(c.Controlplane.Parameters.OrganizationUUID); isEnvVar && resolved != "" {
 					c.Controlplane.Parameters.OrganizationUUID = resolved
