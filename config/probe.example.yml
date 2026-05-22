@@ -1,7 +1,7 @@
 # Confluence probe — copy to config/probe.yml and set env vars (see env.secrets.example).
 probe:
   name: "confluence"
-  version: "0.1.0"
+  version: "0.2.0"
 
 confluence:
   base_url: "https://your-domain.atlassian.net"

@@ -9,9 +9,15 @@ Tag naming: `0.y.z` (no `v` prefix). Align `cmd/version.go` with the tag before 
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-05-22
+
 ### Changed
 
-- **`probe-core`**: `controlplane.base_url` / `FLUID_CONTROLPLANE_HTTP_BASE` only (removed `websocket_url` and WebSocket client).
+- **`probe-core`**: control plane connection requires **`controlplane.base_url`** / **`FLUID_CONTROLPLANE_HTTP_BASE`** (HTTP **`/probes`** only).
+
+### Removed
+
+- WebSocket transport and **`websocket_url`** / **`FLUID_CONTROLPLANE_WEBSOCKET_URL`** configuration.
 
 ## [0.1.3] - 2026-05-22
 
