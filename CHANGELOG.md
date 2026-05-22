@@ -9,16 +9,20 @@ Tag naming: `0.y.z` (no `v` prefix). Align `cmd/version.go` with the tag before 
 
 ## [Unreleased]
 
+### Changed
+
+- **`probe-core`**: `controlplane.base_url` / `FLUID_CONTROLPLANE_HTTP_BASE` only (removed `websocket_url` and WebSocket client).
+
 ## [0.1.3] - 2026-05-22
 
 ### Changed
 
-- Control plane transport is HTTP only: **`POST /probes/register`**, **`/probes/ping`**, **`/probes/v1/ingest`** via **`probe-core`** (compatible with control plane 0.5+). Legacy `controlplane.websocket_url` / `FLUID_CONTROLPLANE_WEBSOCKET_URL` is still accepted; **`probe-core`** derives the HTTP base URL when `base_url` is unset.
-- Documentation and examples prefer `FLUID_CONTROLPLANE_HTTP_BASE` / `controlplane.base_url`; empty optional `base_url` env no longer disables the whole control plane block.
+- Control plane transport is HTTP only: **`POST /probes/register`**, **`/probes/ping`**, **`/probes/v1/ingest`** via **`probe-core`** (control plane 0.5+).
+- Documentation and examples use `FLUID_CONTROLPLANE_HTTP_BASE` / `controlplane.base_url`.
 
 ### Fixed
 
-- `internal/config`: resolving optional `base_url` from the environment no longer clears control plane config when the variable is unset (WebSocket URL fallback remains valid).
+- `internal/config`: empty optional `base_url` env no longer disables the control plane block when misconfigured.
 
 ## [0.1.2] - 2026-05-21
 
